@@ -1,4 +1,19 @@
 import requests
 import json
+import constants
 
-response_api = requests.get("https://{baseURL}/traffic/services/{versionNumber}/incidentDetails?key={KiLGscijJLMBPhpleztf5K8JlMDAslDl}&ids={ids}&fields={fields}&language={language}&t={t}&categoryFilter={categoryFilter}&timeValidityFilter={timeValidityFilter}")
+from flask import Flask
+
+
+app = Flask(__name__)
+
+api_version = constants.TOMTOM_API_VERSION
+api_key = constants.TOMTOM_API_KEY
+
+response_api = requests.get("https://api.tomtom.com/traffic/services/{api_version}/incidentDetails?key={api_key}&ids={ids}&fields={fields}&t={t}&categoryFilter={categoryFilter}&timeValidityFilter={timeValidityFilter}")
+
+
+
+app.route("/incidents")
+def hello_world():
+    return response_api
