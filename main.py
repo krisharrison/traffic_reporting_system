@@ -10,10 +10,13 @@ app = Flask(__name__)
 api_version = constants.TOMTOM_API_VERSION
 api_key = constants.TOMTOM_API_KEY
 
-response_api = requests.get("https://api.tomtom.com/traffic/services/{0}/incidentDetails?key={1}&ids={ids}&fields={fields}&t={t}&categoryFilter={categoryFilter}&timeValidityFilter={timeValidityFilter}").format(0,1)
+url = "https://api.tomtom.com/traffic/services/{0}/incidentDetails".format(api_version)
+payload = {"key":api_key,"ids":"","fields":{},"t":"","categoryFilter":"","timeValidityFilter":""}
+api_response = requests.get(url,payload)
 
 
 
-app.route("/incidents")
-def hello_world():
-    return response_api
+@app.route("/")
+def get_api_response():
+    return api_response.url
+
