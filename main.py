@@ -1,6 +1,7 @@
 import requests
-import json
 import constants
+import mysql.connector
+import config
 
 from flask import Flask
 
@@ -18,19 +19,19 @@ payload = {"key": api_key,
            "timeValidityFilter": "present"
            }
 
+# Tomtom response object
 api_response = requests.get(url, params=payload)
 
-json_decode = api_response.json()
-json_decode
-for item in json_decode.keys():
-    print(json_decode)
+conn = mysql.connector.connect(user='root', password=config.database_key, host='127.0.0.1', database='traffic data')
 
 
+# header route
 @app.route("/")
 def get_api_response_header():
     return dict(api_response.headers)
 
 
+# payload route
 @app.route("/data")
 def get_api_response():
     return api_response.json()
