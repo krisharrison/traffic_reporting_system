@@ -1,6 +1,8 @@
 import requests
-import constants
 import mysql.connector
+from mysql.connector import errorcode
+
+import constants
 import config
 
 from flask import Flask
@@ -25,7 +27,18 @@ payload = {"key": api_key,
 api_response = requests.get(url, params=payload)
 
 # Connecting to database
-conn = mysql.connector.connect(user=config.username, password=config.database_key, host='127.0.0.1', database='traffic_db')
+try:
+    conn = mysql.connector.connect(user=config.username, password=config.database_key, host='127.0.0.1', database='traffic_db')
+
+except mysql.connector.Error as err:
+    if err.errno == errorcode.EA_ACCESS_DENIED_ACCESS:
+        print("Something wrong with the username and password")
+    elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        print("Database does not exist")
+    else:
+        print(err)
+else:
+    conn.close()
 
 
 # header route
