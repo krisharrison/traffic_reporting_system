@@ -8,9 +8,11 @@ from flask import Flask
 
 app = Flask(__name__)
 
+# api version and key imported from constants
 api_version = constants.TOMTOM_API_VERSION
 api_key = constants.TOMTOM_API_KEY
 
+# Url & Payload strings
 url = "https://api.tomtom.com/traffic/services/{0}/incidentDetails".format(api_version)
 payload = {"key": api_key,
            "bbox": "-80.243527, 43.141332, -79.975639, 43.178831",
@@ -22,7 +24,8 @@ payload = {"key": api_key,
 # Tomtom response object
 api_response = requests.get(url, params=payload)
 
-conn = mysql.connector.connect(user='root', password=config.database_key, host='127.0.0.1', database='traffic data')
+# Connecting to database
+conn = mysql.connector.connect(user=config.username, password=config.database_key, host='127.0.0.1', database='traffic_db')
 
 
 # header route
