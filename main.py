@@ -40,6 +40,17 @@ except mysql.connector.Error as err:
 else:
     conn.close()
 
+# Writing to database
+try:
+    with conn.cursor() as cursor:
+         sql = ""
+         cursor.execute()
+    conn.commit()
+
+    print("Record comitted successfully")
+finally:
+    conn.close()
+
 
 # header route
 @app.route("/")
