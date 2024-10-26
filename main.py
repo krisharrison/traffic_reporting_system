@@ -1,4 +1,5 @@
 import requests
+import json
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -17,7 +18,7 @@ api_key = constants.TOMTOM_API_KEY
 # Url & Payload strings
 url = "https://api.tomtom.com/traffic/services/{0}/incidentDetails".format(api_version)
 payload = {"key": api_key,
-           "bbox": "-80.243527, 43.141332, -79.896407, 43.178831",
+           "bbox": "-80.243527, 43.149550, -79.836727, 43.185858",
            "fields":"{incidents{type,geometry{type,coordinates},properties{id,iconCategory,magnitudeOfDelay,events{description,code,iconCategory},startTime,endTime,from,to,length,delay,roadNumbers,timeValidity,numberOfReports,lastReportTime,tmc{countryCode,tableNumber,tableVersion,direction,points{location,offset}}}}}",
            "categoryFilter": "0,1,2,3,4,5,6,7,8,9,10,11,14",
            "timeValidityFilter": "present"
@@ -26,9 +27,22 @@ payload = {"key": api_key,
 # Tomtom response object
 api_response = requests.get(url, params=payload)
 
-# Connecting to database
+# writing to the database
 try:
     conn = mysql.connector.connect(user=config.username, password=config.database_key, host='127.0.0.1', database='traffic_db')
+    with conn.cursor() as cursor:
+        add_incident = ("INSERT INTO incidents"
+                         "(id, iconCategory, magnitudeOfDelay, startTime, eventDescription) "
+                         "VALUES(%(id)s, %(iconCategory)s, %(magintudeOfDelay)s, %(startTime)s, %(evenDescription)s")
+
+        add_coordindates = ("INSERT INTO coordinates"
+                            "(coordinates_id, incidents_id, latitude, longitude)"
+                            "VALUES(%(coordinates_id)s, %(incidents_id)s, %(latitude)s, %(longitude)s)")
+
+        # cursor.execute()
+        # conn.commit()
+
+        print("Record comitted successfully")
 
 except mysql.connector.Error as err:
     if err.errno == errorcode.EA_ACCESS_DENIED_ACCESS:
@@ -37,20 +51,55 @@ except mysql.connector.Error as err:
         print("Database does not exist")
     else:
         print(err)
-else:
-    conn.close()
-
-# Writing to database
-try:
-    with conn.cursor() as cursor:
-         sql = ""
-         cursor.execute()
-    conn.commit()
-
-    print("Record comitted successfully")
 finally:
     conn.close()
 
+data = api_response.text
+decoded_data = json.loads(data)
+incidents_length = len(decoded_data["incidents"]) - 1
+
+
+# Grab data from JSON response
+# Outer loop is for data to be comitted to the incidents table
+# Inner loop is for data to be commited to the coordinates table
+for incident_index in range(incidents_length):
+    print(end="\n")
+    print("index: ", incident_index)
+    # Incidents table data
+    id = decoded_data["incidents"][incident_index]["properties"]["id"]
+    iconCategory = decoded_data["incidents"][incident_index]["properties"]["iconCategory"]
+    magnitudeOfDelay = decoded_data["incidents"][incident_index]["properties"]["magnitudeOfDelay"]
+    startTime = decoded_data["incidents"][incident_index]["properties"]["startTime"]
+    description = decoded_data["incidents"][0]["properties"]["events"][0]["description"]
+    print(end="\n")
+
+   
+    # incidents table data
+    incidents_data = {
+        "id": id,
+        "iconCategory": iconCategory,
+        "magnitudeOfDelay": magnitudeOfDelay,
+        "startTime": startTime,
+        "description": description
+    }
+    print(incidents_data)
+  
+    
+    # Coordinates length at index *incident_index*
+    coordinates_length = len(decoded_data["incidents"][incident_index]["geometry"]["coordinates"]) - 1
+    for coordinates_index in range(coordinates_length):
+        # Coordinates table data
+        incidents_id = id
+        latitude = decoded_data["incidents"][incident_index]["geometry"]["coordinates"][coordinates_index][1]
+        longitude = decoded_data["incidents"][incident_index]["geometry"]["coordinates"][coordinates_index][0]
+
+        # Coordinates table data
+        coordinates_data = {
+            "incidents_id": incidents_id,
+            "latitude": latitude,
+            "longitude": longitude
+        }
+        print(coordinates_data)
 
 # header route
 @app.route("/")
@@ -61,4 +110,6 @@ def get_api_response_header():
 # payload route
 @app.route("/data")
 def get_api_response():
-    return api_response.json()
+    data = api_response.text
+    decoded_data = json.loads(data)
+    return decoded_data
