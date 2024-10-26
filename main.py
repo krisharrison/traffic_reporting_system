@@ -51,29 +51,19 @@ except mysql.connector.Error as err:
         print("Database does not exist")
     else:
         print(err)
-finally:
-    conn.close()
-
-data = api_response.text
-decoded_data = json.loads(data)
-incidents_length = len(decoded_data["incidents"]) - 1
 
 
-# Grab data from JSON response
-# Outer loop is for data to be comitted to the incidents table
-# Inner loop is for data to be commited to the coordinates table
-for incident_index in range(incidents_length):
-    print(end="\n")
-    print("index: ", incident_index)
+
+# get incident from json obj
+# return incident dict
+def get_incident(incident):
     # Incidents table data
-    id = decoded_data["incidents"][incident_index]["properties"]["id"]
-    iconCategory = decoded_data["incidents"][incident_index]["properties"]["iconCategory"]
-    magnitudeOfDelay = decoded_data["incidents"][incident_index]["properties"]["magnitudeOfDelay"]
-    startTime = decoded_data["incidents"][incident_index]["properties"]["startTime"]
-    description = decoded_data["incidents"][0]["properties"]["events"][0]["description"]
-    print(end="\n")
+    id = incident["id"]
+    iconCategory = incident["iconCategory"]
+    magnitudeOfDelay = incident["magnitudeOfDelay"]
+    startTime = incident["startTime"]
+    description = incident["events"][0]["description"]
 
-   
     # incidents table data
     incidents_data = {
         "id": id,
@@ -82,24 +72,57 @@ for incident_index in range(incidents_length):
         "startTime": startTime,
         "description": description
     }
-    print(incidents_data)
-  
-    
+
+    return incidents_data
+
+
+
+# get coordinates from json obj
+# return coordinates dict
+def get_coordinates(coordinates, incident_id):
+    # Coordinates table data
+    incidents_id = incident_id
+    latitude = coordinates[1]
+    longitude = coordinates[0]
+
+    # Coordinates table data
+    coordinates_data = {
+        "incidents_id": incidents_id,
+        "latitude": latitude,
+        "longitude": longitude
+    }
+    return coordinates_data
+
+
+data = api_response.text
+decoded_data = json.loads(data)
+incidents_length = len(decoded_data["incidents"]) - 1
+
+
+
+# Grab data from JSON response
+# Outer loop is for data to be comitted to the incidents table
+# Inner loop is for data to be commited to the coordinates table
+for incident_index in range(incidents_length):
+    print(end="\n")
+    # set incident
+    # get incident data
+    # insert incident data
+    incident = decoded_data["incidents"][incident_index]["properties"]
+    incident_data = get_incident(incident)
+    print(incident_data)
+
     # Coordinates length at index *incident_index*
     coordinates_length = len(decoded_data["incidents"][incident_index]["geometry"]["coordinates"]) - 1
     for coordinates_index in range(coordinates_length):
-        # Coordinates table data
-        incidents_id = id
-        latitude = decoded_data["incidents"][incident_index]["geometry"]["coordinates"][coordinates_index][1]
-        longitude = decoded_data["incidents"][incident_index]["geometry"]["coordinates"][coordinates_index][0]
-
-        # Coordinates table data
-        coordinates_data = {
-            "incidents_id": incidents_id,
-            "latitude": latitude,
-            "longitude": longitude
-        }
+         
+        coordinates = decoded_data["incidents"][incident_index]["geometry"]["coordinates"][coordinates_index]
+        incident_id = incident_data["id"]
+        coordinates_data = get_coordinates(coordinates,incident_id)
         print(coordinates_data)
+        
+
+
 
 # header route
 @app.route("/")
