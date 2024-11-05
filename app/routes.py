@@ -1,16 +1,11 @@
+from flask import Blueprint
+from .api import decoded_data
+from .db import insert
 
-
+routes = Blueprint('routes',__name__)
 
 # header route
-@app.route("/")
-def get_api_response_header():
-    return dict(api_response.headers)
-
-
-# payload route
-@app.route("/data")
-def get_api_response():
-    data = api_response.text
-    decoded_data = json.loads(data)
-    return decoded_data
-
+@routes.route("/")
+def insert_route():
+    insert(decoded_data)
+    return "Data displayed in terminal"

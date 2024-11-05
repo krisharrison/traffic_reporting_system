@@ -1,15 +1,17 @@
+from flask import Blueprint
 import mysql.connector
 from mysql.connector import errorcode
 
-import config
+from .utils.config import database_key, username
+from .helper.helper_db import get_incident, get_coordinates
 
+traffic_db = Blueprint('traffic_db',__name__)
 
-def insert():
-    pass
+def insert(decoded_data):
 
     # writing to the database
     try:
-        conn = mysql.connector.connect(user=config.username, password=config.database_key, host='127.0.0.1', database='traffic_db')
+        conn = mysql.connector.connect(user=username, password=database_key, host='127.0.0.1', database='traffic_db')
         with conn.cursor() as cursor:
             add_incident = ("INSERT INTO incidents"
                            "(id, iconCategory, magnitudeOfDelay, startTime, eventDescription) "

@@ -1,13 +1,15 @@
+from flask import Blueprint
 import requests
 import json
 
 
-import constants
+from .utils.constants import TOMTOM_API_VERSION, TOMTOM_API_KEY
 
+tomtom_api = Blueprint('tomtom_api', __name__)
 
 # api version and key imported from constants
-api_version = constants.TOMTOM_API_VERSION
-api_key = constants.TOMTOM_API_KEY
+api_version = TOMTOM_API_VERSION
+api_key = TOMTOM_API_KEY
 
 
 
