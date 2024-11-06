@@ -15,10 +15,10 @@ def insert(decoded_data):
         with conn.cursor() as cursor:
             add_incident = ("INSERT INTO incidents"
                            "(id, iconCategory, magnitudeOfDelay, startTime, eventDescription) "
-                           "VALUES(%(id)s, %(iconCategory)s, %(magintudeOfDelay)s, %(startTime)s, %(evenDescription)s")
+                           "VALUES(%(id)s, %(iconCategory)s, %(magnitudeOfDelay)s, %(startTime)s, %(eventDescription)s")
 
             add_coordindates = ("INSERT INTO coordinates"
-                               "(coordinates_id, incidents_id, latitude, longitude)"
+                               "(coordinates_id, incidents_id, latitude, longitude) "
                                "VALUES(%(coordinates_id)s, %(incidents_id)s, %(latitude)s, %(longitude)s)")
 
 
@@ -33,7 +33,7 @@ def insert(decoded_data):
                 # insert incident data
                 incident = decoded_data["incidents"][incident_index]["properties"]
                 incident_data = get_incident(incident)
-                cursor.execute(incident_data)
+                cursor.execute(add_incident, incident_data)
 
                 # Coordinates length at index *incident_index*
                 coordinates_length = len(decoded_data["incidents"][incident_index]["geometry"]["coordinates"]) - 1
@@ -42,6 +42,7 @@ def insert(decoded_data):
                     coordinates = decoded_data["incidents"][incident_index]["geometry"]["coordinates"][coordinates_index]
                     incident_id = incident_data["id"]
                     coordinates_data = get_coordinates(coordinates,incident_id)
+                    cursor.execute(add_coordindates, coordinates_data)
         
                     cursor.execute(coordinates_data)
                 conn.commit()
@@ -49,7 +50,7 @@ def insert(decoded_data):
 
 
     except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ACCESS:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something wrong with the username and password")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
