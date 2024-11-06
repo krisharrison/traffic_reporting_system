@@ -28,13 +28,12 @@ def insert(decoded_data):
             # Outer loop is for data to be comitted to the incidents table
             # Inner loop is for data to be commited to the coordinates table
             for incident_index in range(incidents_length):
-                print(end="\n")
                 # set incident
                 # get incident data
                 # insert incident data
                 incident = decoded_data["incidents"][incident_index]["properties"]
                 incident_data = get_incident(incident)
-                print(incident_data)
+                cursor.execute(incident_data)
 
                 # Coordinates length at index *incident_index*
                 coordinates_length = len(decoded_data["incidents"][incident_index]["geometry"]["coordinates"]) - 1
@@ -43,16 +42,14 @@ def insert(decoded_data):
                     coordinates = decoded_data["incidents"][incident_index]["geometry"]["coordinates"][coordinates_index]
                     incident_id = incident_data["id"]
                     coordinates_data = get_coordinates(coordinates,incident_id)
-                    print(coordinates_data)
         
-                    # cursor.execute()
-                    # conn.commit()
-
-                    print("Record comitted successfully")
+                    cursor.execute(coordinates_data)
+                conn.commit()
+                print("Record comitted successfully")
 
 
     except mysql.connector.Error as err:
-        if err.errno == errorcode.EA_ACCESS_DENIED_ACCESS:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ACCESS:
             print("Something wrong with the username and password")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
