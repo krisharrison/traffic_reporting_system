@@ -15,13 +15,13 @@ def insert(decoded_data):
         with conn.cursor() as cursor:
             add_incident = ("INSERT INTO incidents"
                            "(id, iconCategory, magnitudeOfDelay, startTime, eventDescription) "
-                           "VALUES(%(id)s, %(iconCategory)s, %(magnitudeOfDelay)s, %(startTime)s, %(eventDescription)s")
+                           "VALUES(%(id)s, %(iconCategory)s, %(magnitudeOfDelay)s, %(startTime)s, %(eventDescription)s)")
 
             add_coordindates = ("INSERT INTO coordinates"
                                "(coordinates_id, incidents_id, latitude, longitude) "
                                "VALUES(%(coordinates_id)s, %(incidents_id)s, %(latitude)s, %(longitude)s)")
 
-
+            
             
             incidents_length = len(decoded_data["incidents"]) - 1
             # Grab data from JSON response
@@ -33,7 +33,7 @@ def insert(decoded_data):
                 # insert incident data
                 incident = decoded_data["incidents"][incident_index]["properties"]
                 incident_data = get_incident(incident)
-                cursor.execute(add_incident, incident_data)
+                cursor.execute(add_incident, incident_data, multi=True)
 
                 # Coordinates length at index *incident_index*
                 coordinates_length = len(decoded_data["incidents"][incident_index]["geometry"]["coordinates"]) - 1
@@ -42,7 +42,7 @@ def insert(decoded_data):
                     coordinates = decoded_data["incidents"][incident_index]["geometry"]["coordinates"][coordinates_index]
                     incident_id = incident_data["id"]
                     coordinates_data = get_coordinates(coordinates,incident_id)
-                    cursor.execute(add_coordindates, coordinates_data)
+                    cursor.execute(add_coordindates, coordinates_data, multi=True)
         
                 conn.commit()
                 print("Record comitted successfully")
