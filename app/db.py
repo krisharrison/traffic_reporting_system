@@ -44,7 +44,6 @@ def insert(decoded_data):
                     coordinates_data = get_coordinates(coordinates,incident_id)
                     cursor.execute(add_coordindates, coordinates_data)
         
-                    cursor.execute(coordinates_data)
                 conn.commit()
                 print("Record comitted successfully")
 
