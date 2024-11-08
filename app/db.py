@@ -22,7 +22,6 @@ def insert(decoded_data):
                                "VALUES(%(incidents_id)s, %(latitude)s, %(longitude)s)")
 
             
-            
             incidents_length = len(decoded_data["incidents"]) - 1
             # Grab data from JSON response
             # Outer loop is for data to be comitted to the incidents table
