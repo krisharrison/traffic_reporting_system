@@ -18,8 +18,8 @@ def insert(decoded_data):
                            "VALUES(%(id)s, %(iconCategory)s, %(magnitudeOfDelay)s, %(startTime)s, %(eventDescription)s)")
 
             add_coordindates = ("INSERT INTO coordinates"
-                               "(coordinates_id, incidents_id, latitude, longitude) "
-                               "VALUES(%(coordinates_id)s, %(incidents_id)s, %(latitude)s, %(longitude)s)")
+                               "(incidents_id, latitude, longitude) "
+                               "VALUES(%(incidents_id)s, %(latitude)s, %(longitude)s)")
 
             
             
@@ -51,6 +51,8 @@ def insert(decoded_data):
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something wrong with the username and password")
+        elif err.errno == errorcode.ER_DUP_ENTRY:
+            print("Error! duplicate entry with id: ", incident_data["id"])
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
         else:
