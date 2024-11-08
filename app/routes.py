@@ -8,4 +8,4 @@ routes = Blueprint('routes',__name__)
 @routes.route("/", methods=["GET","POST"])
 def insert_route():
     insert(decoded_data)
-    return "Data displayed in terminal"
+    return "Data commited to data"
