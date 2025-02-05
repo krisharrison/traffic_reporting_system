@@ -9,3 +9,7 @@ routes = Blueprint('routes',__name__)
 def insert_route():
     insert(decoded_data)
     return "Data commited to data"
+
+@routes.route("/scheduler_test", methods=["GET","POST"])
+def scheduler_test():
+    return "Scheduler Test"
